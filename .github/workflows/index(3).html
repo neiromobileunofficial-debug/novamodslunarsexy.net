@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Nova Mods - Next Gen Download Hub</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    color: #ffffff;
+    overflow-x: hidden;
+    background: #040711;
+    position: relative;
+  }
+
+  /* Ambient Glowing Background */
+  .blob { position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.6; z-index: 0; pointer-events: none; }
+  .blob-1 { width: 380px; height: 380px; background: #6366f1; top: -60px; left: -60px; animation: blob1 14s infinite alternate; }
+  .blob-2 { width: 420px; height: 420px; background: #3b82f6; bottom: -120px; right: -60px; animation: blob2 18s infinite alternate; }
+  .blob-3 { width: 300px; height: 300px; background: #a855f7; top: 45%; left: 25%; animation: blob3 12s infinite alternate; }
+  @keyframes blob1 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(100px, 80px) scale(1.15); } }
+  @keyframes blob2 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-120px, -100px) scale(1.1); } }
+  @keyframes blob3 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-60px, 90px) scale(0.9); } }
+
+  /* Glass Panels */
+  .glass {
+    background: rgba(15, 23, 42, 0.78);
+    backdrop-filter: blur(25px) saturate(200%);
+    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+
+  /* Navigation Bar */
+  nav {
+    position: fixed; top: 12px; left: 50%; width: 92%; max-width: 1050px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 24px; border-radius: 999px; z-index: 100;
+    transform: translateX(-50%);
+  }
+  nav .logo { font-size: 1.35rem; font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(135deg, #ffffff, #93c5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; }
+  nav .nav-links { display: flex; align-items: center; gap: 12px; }
+
+  nav a { color: rgba(255, 255, 255, 0.85); text-decoration: none; font-size: 0.9rem; font-weight: 500; padding: 6px 12px; transition: color 0.2s; white-space: nowrap; }
+  nav a:hover { color: #38bdf8; }
+
+  /* Ultra-Visible Mobile-Safe Sign In Button */
+  .btn-signin {
+    padding: 10px 22px !important;
+    border-radius: 999px !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+    cursor: pointer; transition: all 0.3s ease !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+  }
+  .btn-signin:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 6px 22px rgba(139, 92, 246, 0.7); }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08); color: #ffffff; font-size: 0.88rem;
+    font-weight: 600; cursor: pointer; transition: all 0.25s ease;
+  }
+  .btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+  .btn-primary { background: linear-gradient(135deg, #2563eb, #7c3aed); border-color: rgba(255, 255, 255, 0.3); }
+  .btn-danger { background: rgba(239, 68, 68, 0.25); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5; }
+
+  /* User Badge */
+  .user-badge { display: flex; align-items: center; gap: 8px; padding: 7px 16px; border-radius: 999px; background: rgba(34, 197, 94, 0.22); border: 1px solid rgba(34, 197, 94, 0.5); font-size: 0.85rem; font-weight: 700; color: #4ade80; cursor: pointer; white-space: nowrap; }
+  .user-badge span { width: 8px; height: 8px; background-color: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e; }
+
+  /* 📱 MOBILE-OPTIMIZED FLOATING CHATBOT BUTTON (FAB) */
+  .fab-bot {
+    position: fixed;
+    right: 20px;
+    bottom: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    z-index: 999; /* Highest priority layer on mobile */
+    cursor: pointer;
+    background: linear-gradient(135deg, #2563eb, #a855f7);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 10px 28px rgba(168, 85, 247, 0.5), 0 0 15px rgba(59, 130, 246, 0.4);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    touch-action: manipulation;
+  }
+  .fab-bot:hover { transform: scale(1.08) rotate(6deg); }
+  .fab-bot:active { transform: scale(0.95); }
+
+  /* Layout */
+  section { position: relative; z-index: 1; min-height: 100vh; padding: 110px 16px 40px; display: grid; place-items: center; }
+  .card { padding: 36px 24px; border-radius: 28px; width: 100%; max-width: 580px; text-align: center; }
+
+  /* Modals */
+  .modal-overlay { position: fixed; inset: 0; display: none; place-items: center; background: rgba(3, 7, 18, 0.82); backdrop-filter: blur(18px); z-index: 1000; opacity: 0; transition: opacity 0.3s ease; padding: 12px; }
+  .modal-overlay.active { display: grid; opacity: 1; }
+  .box { width: 92%; max-width: 460px; padding: 24px; border-radius: 24px; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.22); }
+
+  /* Responsive Chatbot UI Box */
+  .chat-box {
+    display: flex;
+    flex-direction: column;
+    height: 480px;
+    max-height: 82vh; /* Keeps chat box fully visible on short mobile screens */
+    justify-content: space-between;
+  }
+  .chat-history { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; border-radius: 18px; background: rgba(2, 6, 23, 0.65); border: 1px solid rgba(255,255,255,0.08); }
+  .chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 18px; font-size: 0.85rem; line-height: 1.45; word-break: break-word; }
+  .bot-msg { align-self: flex-start; background: rgba(30, 58, 138, 0.45); border: 1px solid rgba(59, 130, 246, 0.4); color: #e0f2fe; border-bottom-left-radius: 4px; }
+  .user-msg { align-self: flex-end; background: rgba(126, 34, 206, 0.5); border: 1px solid rgba(168, 85, 247, 0.5); color: #f3e8ff; border-bottom-right-radius: 4px; }
+  
+  /* Quick Prompt Badges */
+  .quick-prompts { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 6px; -webkit-overflow-scrolling: touch; }
+  .quick-chip { font-size: 0.76rem; padding: 6px 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); color: #38bdf8; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+  .quick-chip:hover { background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; }
+
+  /* Agreement Check Cards */
+  .check-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 10px 0; border-radius: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); cursor: pointer; text-align: left; }
+  .check-box-icon { width: 22px; height: 22px; border-radius: 6px; border: 2px solid rgba(255, 255, 255, 0.4); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; flex-shrink: 0; background: rgba(0,0,0,0.2); }
+  .check-item.active { background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.6); }
+  .check-item.active .check-box-icon { background: #22c55e; border-color: #22c55e; color: #fff; }
+
+  /* Form Inputs */
+  .input-label { display: block; text-align: left; font-size: 0.8rem; font-weight: 600; color: #e2e8f0; margin-top: 10px; margin-bottom: 4px; }
+  input { width: 100%; padding: 12px 16px; margin-bottom: 10px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.3); background: rgba(10, 15, 30, 0.95); color: #ffffff; outline: none; font-size: 0.9rem; }
+  input:focus { border-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
+
+  /* Progress Bars */
+  .bar { height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 999px; overflow: hidden; margin: 16px 0; border: 1px solid rgba(255,255,255,0.15); }
+  .fill { height: 100%; width: 0%; background: linear-gradient(90deg, #3b82f6, #06b6d4, #a855f7); transition: width 1s linear; }
+  .status-msg { font-size: 0.82rem; margin: 8px 0; min-height: 20px; text-align: left; font-weight: 600; }
+
+  /* 📱 MOBILE RESPONSIVE FIXES FOR NAVBAR & CHATBOT */
+  @media (max-width: 640px) {
+    nav {
+      width: 95%;
+      padding: 8px 14px;
+      top: 8px;
+    }
+    nav .logo {
+      font-size: 1.1rem;
+    }
+    nav .nav-links a {
+      display: none; /* Hide non-essential links on phone screens */
+    }
+    .btn-signin {
+      padding: 8px 16px !important;
+      font-size: 0.82rem !important;
+    }
+    .fab-bot {
+      right: 16px;
+      bottom: 18px;
+      width: 52px;
+      height: 52px;
+    }
+    .box {
+      width: 96%;
+      padding: 18px 14px;
+    }
+    .chat-box {
+      height: 440px;
+      max-height: 80vh;
+    }
+  }
+</style>
+</head>
+<body>
+<!-- PASTE PART 2 DIRECTLY BELOW THIS LINE -->
+<!-- Ambient Glowing Background -->
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<!-- Navigation Bar -->
+<nav class="glass">
+  <div class="logo">Nova Mods</div>
+  <div class="nav-links">
+    <a href="#home">Home</a>
+    <a href="#downloads">Downloads</a>
+    <a href="#about">About</a>
+    <div id="authContainer">
+      <button class="btn-signin" onclick="openModal('login')">Sign In</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Sections -->
+<section id="home">
+  <div class="card glass">
+    <h1 style="font-size: 2.5rem; margin-bottom: 12px; background: linear-gradient(135deg, #fff, #93c5fd); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Nova Mods</h1>
+    <p style="color: rgba(255, 255, 255, 0.9); font-size: 1.05rem; line-height: 1.6;">Next-generation high-speed mod hub powered by dynamic liquid glass visuals and real-time security verification.</p>
+  </div>
+</section>
+
+<section id="downloads">
+  <div class="card glass">
+    <h2 style="font-size: 1.8rem; margin-bottom: 8px;">Mod Downloads</h2>
+    <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.8); font-size: 0.92rem;">
+      Verified release with automatic security scanning buffer.
+    </p>
+
+    <!-- Download Details Display Card -->
+    <div style="background: rgba(2, 6, 23, 0.65); border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 20px; padding: 20px; text-align: left; margin-bottom: 22px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 10px;">
+        <span style="font-weight: 700; font-size: 1.05rem; color: #60a5fa;" id="displayFileName">Nova Mod Ultra Pack</span>
+        <span style="background: rgba(34, 197, 94, 0.25); border: 1px solid rgba(34, 197, 94, 0.5); color: #4ade80; padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 600;">Safe & Verified</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.85rem; color: rgba(255, 255, 255, 0.9);">
+        <div>📁 <strong>Size:</strong> <span id="displayFileSize" style="color:#cbd5e1;">145.8 MB</span></div>
+        <div>🏷️ <strong>Version:</strong> <span id="displayFileVersion" style="color:#cbd5e1;">v2.5.0</span></div>
+        <div>📅 <strong>Updated:</strong> <span id="displayFileDate" style="color:#cbd5e1;">2026-08-25</span></div>
+        <div>🔗 <strong>Status:</strong> <span style="color: #38bdf8; font-weight:600;">Link Active</span></div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 1rem; border-radius: 14px;" onclick="dl()">Start Download</button>
+  </div>
+</section>
+
+<section id="about">
+  <div class="card glass">
+    <h2 style="font-size: 1.8rem; margin-bottom: 12px;">About Nova Mods</h2>
+    <p style="color: rgba(255, 255, 255, 0.9); line-height: 1.6; font-size: 0.95rem;">
+      We are an independent modding platform dedicated to giving players free, highly safe, and ultra-fast game modifications without bloatware or dead links.
+    </p>
+  </div>
+</section>
+
+<!-- Floating Nova Assistant Button -->
+<div class="fab-bot" onclick="openModal('chatModal')" title="Talk to Nova Bot">
+  <span style="font-size: 1.8rem;">🤖</span>
+</div>
+
+<!-- Chatbot Modal -->
+<div id="chatModal" class="modal-overlay">
+  <div class="box glass chat-box">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+      <h3 style="margin: 0; font-size: 1.2rem; color: #fff;" id="chatBotTitle">🤖 Nova Assistant</h3>
+      <button class="btn" style="padding: 4px 12px; font-size: 0.8rem;" onclick="closeModal('chatModal')">✕</button>
+    </div>
+    
+    <div id="chatHistory" class="chat-history">
+      <div class="chat-msg bot-msg" id="chatWelcomeMsg">👋 Hi! I'm Nova Bot. Ask me anything about Nova Mods or how our downloads work!</div>
+    </div>
+
+    <!-- Quick Prompt Rectangular Badges -->
+    <div class="quick-prompts" id="quickPromptsContainer">
+      <!-- Generated dynamically from config -->
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+      <input id="chatInput" type="text" placeholder="Type a message..." style="margin: 0;" onkeypress="if(event.key==='Enter') sendChat()">
+      <button class="btn btn-primary" style="padding: 10px 18px;" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- Download Overlay Modal -->
+<div id="ov" class="modal-overlay">
+  <div class="box glass">
+    <div id="dlStep1">
+      <h3 style="color: #60a5fa; margin-bottom: 8px;">Step 1: Security Buffer</h3>
+      <p style="font-size: 0.85rem; color: rgba(255,255,255,0.8); margin-bottom: 12px;">Preparing secure link connection...</p>
+      <div class="bar"><div id="fill1" class="fill"></div></div>
+      <p id="txt1" style="margin-bottom: 12px; color: #38bdf8; font-weight: 600; font-size: 0.9rem;">30 seconds left</p>
+    </div>
+
+    <div id="dlStep2" style="display: none;">
+      <h3 style="color: #a855f7; margin-bottom: 6px;">Step 2: Verification</h3>
+      <p style="font-size: 0.82rem; color: rgba(255, 255, 255, 0.8); margin-bottom: 14px;">Select all 3 check boxes below to start the final 10s file scanner:</p>
+      
+      <div id="check1" class="check-item" onclick="toggleCheck('check1')">
+        <div class="check-box-icon" id="box1"></div>
+        <div style="font-size: 0.85rem;">Agree to Terms of Service & Privacy Policy</div>
+      </div>
+      <div id="check2" class="check-item" onclick="toggleCheck('check2')">
+        <div class="check-box-icon" id="box2"></div>
+        <div style="font-size: 0.85rem;">Confirm file integrity & safe installation</div>
+      </div>
+      <div id="check3" class="check-item" onclick="toggleCheck('check3')">
+        <div class="check-box-icon" id="box3"></div>
+        <div style="font-size: 0.85rem;">Acknowledge community rules & guidelines</div>
+      </div>
+
+      <div id="scanBox" style="display: none; margin-top: 14px;">
+        <p id="scanTxt" style="font-size: 0.85rem; color: #38bdf8; font-weight: 600;">🔍 Scanning download file... (10s left)</p>
+        <div class="bar" style="margin: 8px 0 14px;"><div id="fill2" class="fill"></div></div>
+      </div>
+
+      <button id="go" class="btn btn-primary" style="display:none; width: 100%; margin-top: 10px; padding: 14px; font-size: 1rem;" onclick="startFileDownload()">🚀 Download File Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- High-Contrast Sign In Modal -->
+<div id="login" class="modal-overlay">
+  <div class="box glass">
+    <h3 style="font-size: 1.3rem; margin-bottom: 16px; color: #ffffff; text-align: center;">Sign In / Register</h3>
+    
+    <label class="input-label">Username</label>
+    <input id="userInput" type="text" placeholder="Enter your username">
+    
+    <label class="input-label">Email Address</label>
+    <input id="emailInput" type="email" placeholder="name@example.com">
+    
+    <label class="input-label">Password</label>
+    <input id="passInput" type="password" placeholder="••••••••">
+
+    <div style="display: flex; gap: 10px; margin-top: 14px;">
+      <button class="btn btn-primary" style="flex: 1; padding: 12px;" onclick="handleLogin()">Sign In</button>
+      <button class="btn" style="flex: 1; padding: 12px;" onclick="closeModal('login')">Cancel</button>
+    </div>
+    <p style="margin-top: 16px; font-size: 0.82rem; color: rgba(255, 255, 255, 0.8); text-align: center;">
+      Locked out? <a href="#" style="color:#38bdf8; font-weight: 600; text-decoration:none;" onclick="closeModal('login'); openModal('recoveryModal');">Recover Account</a>
+    </p>
+  </div>
+</div>
+
+<!-- Security Kick / Warning Modal -->
+<div id="kickedModal" class="modal-overlay">
+  <div class="box glass" style="border-color: rgba(239, 68, 68, 0.5);">
+    <div style="font-size: 2.4rem; margin-bottom: 6px; text-align: center;">🚨</div>
+    <h3 style="color: #fca5a5; text-align: center;">Session Alert</h3>
+    <p style="font-size: 0.88rem; color: rgba(255, 255, 255, 0.9); margin: 12px 0 18px; line-height: 1.5; text-align: center;">
+      Logged out for security reasons or invalid token. You can recover access below.
+    </p>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-primary" style="flex: 1;" onclick="closeModal('kickedModal'); openModal('recoveryModal');">Recover Access</button>
+      <button class="btn" style="flex: 1;" onclick="closeModal('kickedModal')">Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<!-- Account Controls Modal -->
+<div id="accountModal" class="modal-overlay">
+  <div class="box glass">
+    <h3 style="margin-bottom: 12px;">Account Dashboard</h3>
+    <p style="font-size: 0.88rem; color: rgba(255,255,255,0.9); margin-bottom: 4px;">User: <strong id="currentNameDisplay" style="color: #60a5fa;">User</strong></p>
+    <p style="font-size: 0.88rem; color: rgba(255,255,255,0.9); margin-bottom: 12px;">Email: <strong id="currentEmailDisplay" style="color: #38bdf8;">user@example.com</strong></p>
+    
+    <label class="input-label">Change Email (Unlimited):</label>
+    <input id="newEmailInput" type="email" placeholder="New Email Address">
+    <button id="btnUpdateEmail" class="btn btn-primary" style="width: 100%; margin-bottom: 8px; padding: 10px;" onclick="changeEmail()">Update Email</button>
+
+    <label class="input-label">Change Username (Every 2 Hours):</label>
+    <input id="newUserInput" type="text" placeholder="New Username">
+    <button id="btnUpdateUser" class="btn btn-primary" style="width: 100%; margin-bottom: 8px; padding: 10px;" onclick="changeUsername()">Update Username</button>
+    
+    <label class="input-label">Change Password (Every 30 Mins):</label>
+    <input id="newPassInput" type="password" placeholder="New Password">
+    <button id="btnUpdatePass" class="btn btn-primary" style="width: 100%; margin-bottom: 8px; padding: 10px;" onclick="changePassword()">Update Password</button>
+    
+    <div id="accountStatusMsg" class="status-msg"></div>
+    
+    <div style="display: flex; gap: 10px; margin-top: 12px;">
+      <button class="btn btn-danger" style="flex: 1;" onclick="handleLogout()">Log Out</button>
+      <button class="btn" style="flex: 1;" onclick="closeModal('accountModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Recovery Modal -->
+<div id="recoveryModal" class="modal-overlay">
+  <div class="box glass">
+    <h3 style="margin-bottom: 8px;">Account Recovery</h3>
+    <p style="font-size: 0.82rem; color: rgba(255,255,255,0.85); margin-bottom: 12px;">Enter your recovery email to reset credentials.</p>
+    <input id="recoveryEmailInput" type="email" placeholder="Enter your recovery email">
+    <div id="recoveryStatusMsg" class="status-msg"></div>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+      <button class="btn btn-primary" style="flex: 1;" onclick="handleRecovery()">Send Reset Link</button>
+      <button class="btn" style="flex: 1;" onclick="closeModal('recoveryModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- PASTE PART 3 DIRECTLY BELOW THIS LINE -->
+<script>
+  /* ==========================================================================
+     ⚙️ 1. EDITABLE DOWNLOAD CONFIGURATION
+     ========================================================================== */
+  const FILE_CONFIG = {
+    fileName: "Lunar Sexy (Pro)",            // Display File Name
+    fileSize: "156 MB",                      // Display File Size
+    fileVersion: "v2.2.3",                     // Display Version String
+    fileDate: "Unknown",                    // Display Release/Updated Date
+    downloadUrl: "https://vexfile.com/download/3c7p9jlRld"  // <-- PASTE YOUR DOWNLOAD URL HERE!
+  };
+
+  /* ==========================================================================
+     ⚙️ 2. EDITABLE CHATBOT CONFIGURATION & KNOWLEDGE BASE
+     ========================================================================== */
+  const CHATBOT_CONFIG = {
+    botTitle: "🤖 Nova Assistant",
+    welcomeMessage: "👋 Hi! I'm Nova Bot. Ask me anything about Nova Mods or how our downloads work!",
+    fallbackReply: "I'm here to help! Ask me about Nova Mods, file safety, or download procedures.",
+    
+    // Quick prompt chips displayed at the bottom of the chat UI
+    quickPrompts: [
+      "Why was this created?",
+      "What is Nova Mods?",
+      "How do downloads work?",
+      "Are mods safe?"
+    ],
+
+    // Knowledge base keyword responses (edit or add your own QA rules here)
+    knowledgeBase: [
+      {
+        keywords: ["why", "created", "purpose"],
+        reply: "Nova Mods was created to provide a clean, high-speed, glassmorphism platform for safe and verified mod downloads!"
+      },
+      {
+        keywords: ["what", "nova", "about"],
+        reply: "We are a premier modding platform delivering top-tier, verified mods with dynamic UI animations and quick downloads."
+      },
+      {
+        keywords: ["download", "work", "how", "process"],
+        reply: "Click 'Start Download', complete the 30-second security buffer, check the required agreements, run the 10-second file scan, and grab your file!"
+      },
+      {
+        keywords: ["safe", "virus", "security", "malware"],
+        reply: "All files on Nova Mods are pre-scanned and verified for integrity and safety before release."
+      }
+    ]
+  };
+
+  /* ==========================================================================
+     🔄 STATE MANAGEMENT & CORE LOGIC
+     ========================================================================== */
+  let currentUser = JSON.parse(localStorage.getItem('nova_user')) || null;
+  let lastUserChange = parseInt(localStorage.getItem('nova_last_user_change') || "0", 10);
+  let lastPassChange = parseInt(localStorage.getItem('nova_last_pass_change') || "0", 10);
+  let checks = { check1: false, check2: false, check3: false };
+  let scanInterval = null;
+
+  // Modal Controls
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add('active');
+  }
+
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.remove('active');
+  }
+
+  // Download Sequence & Timers
+  function dl() {
+    openModal('ov');
+    document.getElementById('dlStep1').style.display = 'block';
+    document.getElementById('dlStep2').style.display = 'none';
+
+    let time = 30;
+    const fill1 = document.getElementById('fill1');
+    const txt1 = document.getElementById('txt1');
+    fill1.style.width = '0%';
+    txt1.innerText = `${time} seconds left`;
+
+    const timer = setInterval(() => {
+      time--;
+      fill1.style.width = `${((30 - time) / 30) * 100}%`;
+      txt1.innerText = `${time} seconds left`;
+
+      if (time <= 0) {
+        clearInterval(timer);
+        document.getElementById('dlStep1').style.display = 'none';
+        document.getElementById('dlStep2').style.display = 'block';
+      }
+    }, 1000);
+  }
+
+  function toggleCheck(id) {
+    checks[id] = !checks[id];
+    const el = document.getElementById(id);
+    const boxNum = id.slice(-1);
+    
+    if (checks[id]) {
+      el.classList.add('active');
+      document.getElementById('box' + boxNum).innerText = '✓';
+    } else {
+      el.classList.remove('active');
+      document.getElementById('box' + boxNum).innerText = '';
+    }
+
+    if (checks.check1 && checks.check2 && checks.check3) {
+      startScanner();
+    }
+  }
+
+  function startScanner() {
+    const scanBox = document.getElementById('scanBox');
+    const fill2 = document.getElementById('fill2');
+    const scanTxt = document.getElementById('scanTxt');
+    scanBox.style.display = 'block';
+
+    let scanTime = 10;
+    fill2.style.width = '0%';
+    if (scanInterval) clearInterval(scanInterval);
+
+    scanInterval = setInterval(() => {
+      scanTime--;
+      fill2.style.width = `${((10 - scanTime) / 10) * 100}%`;
+      scanTxt.innerText = `🔍 Scanning download file... (${scanTime}s left)`;
+
+      if (scanTime <= 0) {
+        clearInterval(scanInterval);
+        scanTxt.innerText = "✅ File Scan Complete! Safe to Download.";
+        scanTxt.style.color = "#4ade80";
+        document.getElementById('go').style.display = 'block';
+      }
+    }, 1000);
+  }
+
+  function startFileDownload() {
+    window.open(FILE_CONFIG.downloadUrl, '_blank');
+    closeModal('ov');
+  }
+
+  // Authentication Handlers
+  function handleLogin() {
+    const user = document.getElementById('userInput').value.trim();
+    const email = document.getElementById('emailInput').value.trim();
+    const pass = document.getElementById('passInput').value.trim();
+
+    if (!user || !email || !pass) {
+      alert("Please fill in all account fields.");
+      return;
+    }
+
+    currentUser = { username: user, email: email, password: pass };
+    localStorage.setItem('nova_user', JSON.stringify(currentUser));
+    updateAuthUI();
+    closeModal('login');
+  }
+
+  function handleLogout() {
+    currentUser = null;
+    localStorage.removeItem('nova_user');
+    updateAuthUI();
+    closeModal('accountModal');
+  }
+
+  function updateAuthUI() {
+    const authContainer = document.getElementById('authContainer');
+    if (currentUser) {
+      authContainer.innerHTML = `
+        <div class="user-badge" onclick="openAccountModal()">
+          <span></span>
+          ${currentUser.username}
+        </div>
+      `;
+    } else {
+      authContainer.innerHTML = `
+        <button class="btn-signin" onclick="openModal('login')">Sign In</button>
+      `;
+    }
+  }
+
+  function openAccountModal() {
+    if (!currentUser) return;
+    document.getElementById('currentNameDisplay').innerText = currentUser.username;
+    document.getElementById('currentEmailDisplay').innerText = currentUser.email;
+    document.getElementById('accountStatusMsg').innerText = '';
+    openModal('accountModal');
+  }
+
+  function handleRecovery() {
+    const recEmail = document.getElementById('recoveryEmailInput').value.trim();
+    const statusMsg = document.getElementById('recoveryStatusMsg');
+
+    if (!recEmail) {
+      statusMsg.style.color = '#fca5a5';
+      statusMsg.innerText = 'Please enter a valid recovery email.';
+      return;
+    }
+
+    statusMsg.style.color = '#4ade80';
+    statusMsg.innerText = 'Recovery link sent! Check your inbox.';
+    setTimeout(() => {
+      closeModal('recoveryModal');
+      statusMsg.innerText = '';
+    }, 2500);
+  }
+</script>
+<!-- PASTE PART 4 DIRECTLY BELOW THIS LINE -->
+<script>
+  /* ==========================================================================
+     👤 ACCOUNT MANAGEMENT (WITH TIME CONSTRAINTS)
+     ========================================================================== */
+  function changeEmail() {
+    const newEmail = document.getElementById('newEmailInput').value.trim();
+    const statusMsg = document.getElementById('accountStatusMsg');
+
+    if (!newEmail) {
+      statusMsg.style.color = '#fca5a5';
+      statusMsg.innerText = 'Please enter a valid email address.';
+      return;
+    }
+
+    currentUser.email = newEmail;
+    localStorage.setItem('nova_user', JSON.stringify(currentUser));
+    document.getElementById('currentEmailDisplay').innerText = newEmail;
+    document.getElementById('newEmailInput').value = '';
+
+    statusMsg.style.color = '#4ade80';
+    statusMsg.innerText = 'Email updated successfully!';
+  }
+
+  function changeUsername() {
+    const newName = document.getElementById('newUserInput').value.trim();
+    const statusMsg = document.getElementById('accountStatusMsg');
+    const now = Date.now();
+    const twoHoursInMs = 2 * 60 * 60 * 1000;
+
+    if (!newName) {
+      statusMsg.style.color = '#fca5a5';
+      statusMsg.innerText = 'Please enter a valid username.';
+      return;
+    }
+
+    if (now - lastUserChange < twoHoursInMs) {
+      const remainingMinutes = Math.ceil((twoHoursInMs - (now - lastUserChange)) / (1000 * 60));
+      statusMsg.style.color = '#fca5a5';
+      statusMsg.innerText = `Username can only be changed every 2 hours. (${remainingMinutes} mins remaining)`;
+      return;
+    }
+
+    currentUser.username = newName;
+    lastUserChange = now;
+    localStorage.setItem('nova_user', JSON.stringify(currentUser));
+    localStorage.setItem('nova_last_user_change', lastUserChange.toString());
+
+    document.getElementById('currentNameDisplay').innerText = newName;
+    document.getElementById('newUserInput').value = '';
+    updateAuthUI();
+
+    statusMsg.style.color = '#4ade80';
+    statusMsg.innerText = 'Username updated successfully!';
+  }
+
+  function changePassword() {
+    const newPass = document.getElementById('newPassInput').value.trim();
+    const statusMsg = document.getElementById('accountStatusMsg');
+    const now = Date.now();
+    const thirtyMinsInMs = 30 * 60 * 1000;
+
+    if (!newPass) {
+      statusMsg.style.color = '#fca5a5';
+      statusMsg.innerText = 'Please enter a new password.';
+      return;
+    }
+
+    if (now - lastPassChange < thirtyMinsInMs) {
+      const remainingMinutes = Math.ceil((thirtyMinsInMs - (now - lastPassChange)) / (1000 * 60));
+      statusMsg.style.color = '#fca5a5';
+      statusMsg.innerText = `Password can only be changed every 30 minutes. (${remainingMinutes} mins remaining)`;
+      return;
+    }
+
+    currentUser.password = newPass;
+    lastPassChange = now;
+    localStorage.setItem('nova_user', JSON.stringify(currentUser));
+    localStorage.setItem('nova_last_pass_change', lastPassChange.toString());
+
+    document.getElementById('newPassInput').value = '';
+
+    statusMsg.style.color = '#4ade80';
+    statusMsg.innerText = 'Password updated successfully!';
+  }
+
+  /* ==========================================================================
+     💬 CHATBOT ENGINE & LOGIC
+     ========================================================================== */
+  function renderQuickPrompts() {
+    const container = document.getElementById('quickPromptsContainer');
+    if (!container || !CHATBOT_CONFIG.quickPrompts) return;
+
+    container.innerHTML = '';
+    CHATBOT_CONFIG.quickPrompts.forEach(promptText => {
+      const badge = document.createElement('div');
+      badge.className = 'quick-prompt-badge';
+      badge.innerText = promptText;
+      badge.onclick = () => {
+        document.getElementById('chatInput').value = promptText;
+        sendChat();
+      };
+      container.appendChild(badge);
+    });
+  }
+
+  function sendChat() {
+    const input = document.getElementById('chatInput');
+    const userQuery = input.value.trim();
+    if (!userQuery) return;
+
+    // Display User Message
+    appendMessage(userQuery, 'user-msg');
+    input.value = '';
+
+    // Match Query against Knowledge Base
+    const lowerQuery = userQuery.toLowerCase();
+    let reply = CHATBOT_CONFIG.fallbackReply;
+
+    for (const item of CHATBOT_CONFIG.knowledgeBase) {
+      const matched = item.keywords.some(kw => lowerQuery.includes(kw));
+      if (matched) {
+        reply = item.reply;
+        break;
+      }
+    }
+
+    // Simulate Bot Response Delay
+    setTimeout(() => {
+      appendMessage(reply, 'bot-msg');
+    }, 400);
+  }
+
+  function appendMessage(text, className) {
+    const history = document.getElementById('chatHistory');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `chat-msg ${className}`;
+    msgDiv.innerText = text;
+    history.appendChild(msgDiv);
+    history.scrollTop = history.scrollHeight;
+  }
+
+  /* ==========================================================================
+     🚀 INITIALIZATION ON PAGE LOAD
+     ========================================================================== */
+  window.addEventListener('DOMContentLoaded', () => {
+    // Populate File Download Card Data
+    document.getElementById('displayFileName').innerText = FILE_CONFIG.fileName;
+    document.getElementById('displayFileSize').innerText = FILE_CONFIG.fileSize;
+    document.getElementById('displayFileVersion').innerText = FILE_CONFIG.fileVersion;
+    document.getElementById('displayFileDate').innerText = FILE_CONFIG.fileDate;
+
+    // Initialize Chatbot UI
+    document.getElementById('chatBotTitle').innerText = CHATBOT_CONFIG.botTitle;
+    document.getElementById('chatWelcomeMsg').innerText = CHATBOT_CONFIG.welcomeMessage;
+    renderQuickPrompts();
+
+    // Initialize Auth UI
+    updateAuthUI();
+  });
+</script>
+</body>
+</html>
